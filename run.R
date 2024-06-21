@@ -65,11 +65,11 @@ m <- m %>%
 
 # Exports -----------------------------------------------------------------------
 
-if (!dir.exists("output")) {
-  dir.create("output")
+if (!dir.exists("docs")) {
+  dir.create("docs")
 }
 
-output_file <- "output/lyon_map.html"
+output_file <- "docs/lyon_map.html"
 htmlwidgets::saveWidget(m, file = output_file, selfcontained = TRUE)
 
 # Exporter les objets spatiaux dans un seul fichier GeoPackage
