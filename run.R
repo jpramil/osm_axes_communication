@@ -30,7 +30,7 @@ lyon_partdieu <- lyon_bb %>%
   osmdata_sf()
 
 lyon_rail <- lyon_bb %>%
-  opq() %>%
+  opq(timeout = 60) %>%
   add_osm_feature(key = "railway", value = "rail") %>%
   add_osm_feature(key = 'highspeed', value = 'yes') %>% 
   osmdata_sf()
@@ -72,27 +72,79 @@ if (!dir.exists("output")) {
 output_file <- "output/lyon_map.html"
 htmlwidgets::saveWidget(m, file = output_file, selfcontained = TRUE)
 
-# Exporter les objets spatiaux dans le fichier GeoPackage
+# Exporter les objets spatiaux dans un seul fichier GeoPackage
 
-BUCKET_OUT = "<mon_bucket>"
-FILE_KEY_OUT_S3 = "mon_dossier/BPE_ENS.csv"
+BUCKET_OUT = "jpramil"
 
 aws.s3::s3write_using(
   lyon_autoroutes$osm_lines,
   FUN = sf::st_write,
-  object = FILE_KEY_OUT_S3,
+  delete_dsn = TRUE,
+  object = "BDTopo/lyon_autoroutes.gpkg",
   bucket = BUCKET_OUT,
   opts = list("region" = "")
 )
 
-output_gpkg <- "output/lyon_axes_transports.gpkg"
-sf::st_write(lyon_autoroutes$osm_lines, dsn = output_gpkg, layer = "autoroutes", driver = "GPKG",delete_dsn = TRUE)
-sf::st_write(lyon_trunk$osm_lines, dsn = output_gpkg, layer = "trunk", driver = "GPKG", append = TRUE)
-sf::st_write(lyon_rail$osm_lines, dsn = output_gpkg, layer = "rail", driver = "GPKG", append = TRUE)
-sf::st_write(lyon_perrache$osm_points, dsn = output_gpkg, layer = "gare_perrache", driver = "GPKG", append = TRUE)
-sf::st_write(lyon_partdieu$osm_points, dsn = output_gpkg, layer = "gare_partdieu", driver = "GPKG", append = TRUE)
-sf::st_write(lyon_airports$osm_polygons, dsn = output_gpkg, layer = "airports", driver = "GPKG", append = TRUE)
+aws.s3::s3write_using(
+  x = lyon_trunk$osm_lines,
+  FUN = sf::st_write,
+  delete_dsn = TRUE,
+  object = "BDTopo/lyon_trunk.gpkg",
+  bucket = BUCKET_OUT,
+  opts = list("region" = "")
+)
 
-bucket_name <- "jpramil"
-output_file <- "BDTopo/lyon_axes_transports.gpkg"
-aws.s3::put_object(file = output_gpkg, bucket = bucket_name)
+aws.s3::s3write_using(
+  x = lyon_rail$osm_lines,
+  FUN = sf::st_write,
+  delete_dsn = TRUE,
+  object = "BDTopo/lyon_rail.gpkg",
+  bucket = BUCKET_OUT,
+  opts = list("region" = "")
+)
+
+aws.s3::s3write_using(
+  x = lyon_perrache$osm_points,
+  FUN = sf::st_write,
+  delete_dsn = TRUE,
+  object = "BDTopo/lyon_perrache.gpkg",
+  bucket = BUCKET_OUT,
+  opts = list("region" = "")
+)
+
+aws.s3::s3write_using(
+  x = lyon_partdieu$osm_points,
+  FUN = sf::st_write,
+  delete_dsn = TRUE,
+  object = "BDTopo/lyon_partdieu.gpkg",
+  bucket = BUCKET_OUT,
+  opts = list("region" = "")
+)
+
+aws.s3::s3write_using(
+  x = lyon_airports$osm_polygons,
+  FUN = sf::st_write,
+  delete_dsn = TRUE,
+  object = "BDTopo/lyon_airports.gpkg",
+  bucket = BUCKET_OUT,
+  opts = list("region" = "")
+)
+
+
+# # Import again : 
+# 
+# BUCKET <- "jpramil"
+# sf_lyon_axes_transports <- 
+#   aws.s3::s3read_using(
+#     FUN = sf::st_read,
+#     object = "BDTopo/lyon_perrache.gpkg",
+#     bucket = BUCKET,
+#     opts = list("region" = "")
+#   )
+# 
+
+
+
+
+
+
