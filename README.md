@@ -13,4 +13,4 @@ available_tags("highway")
 
 Gpkg files exported in `s3/jpramil/BDTopo` folder.
 
-![Preview of the map](https://jpramil.github.io/osm_axes_communication/lyon_map.html)
+https://jpramil.github.io/osm_axes_communication/lyon_map.html
